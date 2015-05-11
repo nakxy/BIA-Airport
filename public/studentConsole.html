@@ -1,0 +1,300 @@
+<html lang="en">
+    <head>
+    	<meta charset="utf-8" />
+   		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/> 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<link rel="stylesheet" href="css/dtfs.css" />
+		<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+		<script src="socket.io-client/socket.io.js"></script>
+		<script>
+  				var socket = io();
+		</script>
+		<title>Student Console</title>
+		<script type="text/javascript">
+    $( document ).ready(function() {
+    	var globalClassTopicArray=[];
+    	var globalClassSelect="";
+    	var globalTopicSelect="";
+    	var globalTopicRating="";
+    	var globalTopicComment="";
+		var activeDiv="";
+ 
+
+
+ 	function nextSelect()
+	{
+	var divWidth=$("#"+activeDiv).width();
+	if(activeDiv == "step1")
+	{
+		$("#"+activeDiv).animate({left:-divWidth+20});
+	}
+	else if (activeDiv == "step2")
+	{
+		$("#"+activeDiv).animate({left:-divWidth+50});
+	}
+	else if (activeDiv == "step3")
+	{
+		$("#"+activeDiv).animate({left:-divWidth+80});
+	}
+	else if (activeDiv == "step4")
+	{
+		$("#"+activeDiv).animate({left:-divWidth+110});
+		$("#timerContent").show();
+	}
+
+	var nextdiv=activeDiv.substr(activeDiv.length - 1);
+	nextdivValue=parseInt(nextdiv);
+	nextdivValue++;
+	$("#step"+nextdivValue).animate({left:'15%'}); 
+	console.log("next is "+nextdiv);
+	if(nextdivValue <= 5 )
+	{
+		activeDiv="step"+nextdivValue;
+	}
+}
+function prevSelect()
+{
+	var divWidth=$("#"+activeDiv).width();
+	if(activeDiv == "step1")
+	{
+		$('#startFeedBack').show();
+		$("#"+activeDiv).animate({left:'98%'});
+	}
+	else if (activeDiv == "step2")
+	{
+		$("#"+activeDiv).animate({left:'96%'});
+	}
+	else if (activeDiv == "step3")
+	{
+		$("#"+activeDiv).animate({left:'94%'});
+	}
+	else if (activeDiv == "step4")
+	{
+		$("#"+activeDiv).animate({left:'92%'});
+	}
+	var nextdiv=activeDiv.substr(activeDiv.length - 1);
+	nextdivValue=parseInt(nextdiv);
+	nextdivValue--;
+	console.log("next is "+nextdiv);
+	$("#step"+nextdivValue).animate({left:'15%'}); 
+	if(nextdivValue >= 1)
+	{
+		activeDiv="step"+nextdivValue;
+	}
+	}
+
+	
+ $( '#startFeedBack').click(function( event ) {
+ 		socket.emit('StudentFeedbackStart',"StudentDetails");
+    	$('#startFeedBack').hide();
+    	activeDiv="step0";
+    	nextSelect();
+    });
+
+ $( '#step1Next').click(function( event ) {
+ 		if($( '#classSelect').val() == 0)
+ 		{
+ 			alert("Please Select a Class");
+ 		}
+ 		else
+ 		{
+ 			globalClassSelect=$( '#classSelect').val();
+ 			for(var z=0; z<globalClassTopicArray.length ; z++)
+ 			{
+ 				if(globalClassTopicArray[z].class == globalClassSelect)
+ 				{
+ 					globalTopicSelect=globalClassTopicArray[z].topic;
+ 				}
+ 			}
+    		console.log(" Class : "+globalClassSelect);
+    		console.log(" Topic : "+globalTopicSelect);
+    		$( '#topicName').html(globalTopicSelect);
+ 			nextSelect();
+ 		}
+    	
+    });
+ $( '#step1Prev').click(function( event ) {
+    	prevSelect();
+    });
+ $( '#step2Next').click(function( event ) {
+ 		if (!$("input[name='html_elements']:checked").val())
+ 		{
+ 			 $("input:radio:checked").each(function() {
+            globalTopicRating=this.value
+        })   
+ 			//console.log(globalTopicRating);
+ 			nextSelect();
+ 		}
+ 		else
+ 		{
+ 			alert("Please Select A Rating");
+ 		}
+    	
+    });
+ $( '#step3Next').click(function( event ) {
+ 	 globalTopicComment = $('textarea#topicComments').val();
+ 	 console.log(globalTopicComment);
+    	nextSelect();
+    });
+
+ $( '#step4Next').click(function( event ) {
+ 	var ratingDetails = {
+    			"class": globalClassSelect,
+    			"topic": globalTopicSelect,
+    			"rating": globalTopicRating,
+    			"comment": globalTopicComment
+    		}
+    		//console.log(" rating details :" +ratingDetails);
+ 	socket.emit('StudentSubmitRating',ratingDetails);
+    	nextSelect();
+
+    setTimeout(function(){
+    	location.reload();
+    },6000)
+
+    });
+ $( '#step2Prev').click(function( event ) {
+    	prevSelect();
+    });
+ $( '#step3Prev').click(function( event ) {
+    	prevSelect();
+    });
+ $( '#step4Prev').click(function( event ) {
+    	prevSelect();
+    });
+ 
+ socket.on('StudentClassDetails',function(msg)
+ {
+ 	var classDetails="";
+ 	console.log(msg);
+ 	globalClassTopicArray=msg;
+ 	if(msg.length == 0)
+ 	{
+ 		alert("No Classes found");
+ 		prevSelect();
+ 	}
+ 	else
+ 	{
+ 		for(i=0; i<msg.length; i++)
+ 		{
+ 			classDetails=classDetails+'<option>'+msg[i].class+'</option>'
+ 		}
+ 		$( '#classSelect ').append(classDetails);
+ 	}
+});
+ 	
+
+
+
+
+//jQuery End
+});
+    
+    </script>
+    </head>
+    <body>
+
+    <header>
+	<button style=" float:left" class="headerBtn" onclick="location.reload();">Home</button>
+	<button class="headerBtn" style=" float:left">Profile</button>
+	<button class="headerBtn" style=" float:left" id="reportBtn" onclick='window.location="/login"'>Logout</button>
+	<img src="images/dtfs_logo.png" style="float:right;margin-right:10%"/>
+    </header>
+     
+
+
+
+
+
+
+     <section>
+     	<button class="navButton" style="margin-left:45%;margin-top:5%" id="startFeedBack">Start Feedback</button>
+     	<div id="timerContent" style="display:none;text-align: center;"> 
+     	<span class="timerLabel">Thank you for your Feedback</span>
+     	<br/>
+     	<span class="timer">Next topic starts shortly</span>
+     	</div>
+     </section>
+     
+
+
+     <div  id="step1" class="steps steps1">
+     	<div id="step3Content" class="stepContent" ><p style="text-align:center">Select Class</p>
+     	</div>
+     	<div class="stepInfo">
+     	 <div class="form-group">
+ 			<label for="sel1">Select Class:</label>
+  			<select class="form-control" id="classSelect">
+    			<option></option>
+  			</select>
+		</div>
+     	</div>
+     	<div class="stepBtns">
+     	<button style="" type="button" class="btn btn-primary" id="step1Prev">Prev</button>
+     	<button style="bottom:0" type="button" class="btn btn-primary" id="step1Next">Next</button>
+     	</div>
+     </div>
+
+     <div id="step2" class="steps steps2">
+		<div id="step2Content" class="stepContent" ><p style="text-align:center"> Rate Topic : <span id="topicName"></span></p></div>
+		<div class="stepInfo">
+			<div class="radio">
+  				<label><input type="radio" name="optradio" value="5">Very Good</label>
+			</div>
+			<div class="radio">
+ 				 <label><input type="radio" name="optradio" value="4">Good</label>
+			</div>
+			<div class="radio">
+  				<label><input type="radio" name="optradio" value="3">Average</label>
+			</div>
+			<div class="radio">
+  				<label><input type="radio" name="optradio" value="2">Poor</label>
+			</div>
+			<div class="radio">
+ 				 <label><input type="radio" name="optradio" value="1">Unsatisfactory</label>
+			</div>
+		</div>
+		<div class="stepBtns">
+     	<button style="" type="button" class="btn btn-primary" id="step2Prev">Prev</button>
+     	<button style="" type="button" class="btn btn-primary" id="step2Next" >Next</button>
+     	</div>
+	</div>
+
+	<div id="step3" class="steps steps3">
+		<div id="step3Content" class="stepContent" ><p style="text-align:center">Any Comments</p> </div>
+		<div class="stepInfo">
+		<div class="form-group">
+  <label for="comment">Comment:</label>
+  <textarea class="form-control" rows="5" id="topicComments"></textarea>
+</div>
+</div>
+		<div class="stepBtns">
+		<button style="" type="button" class="btn btn-primary" id="step3Prev">Prev</button>
+     	<button style="" type="button" class="btn btn-primary" id="step3Next" >Next</button>
+     	</div>
+	</div>
+
+	<div id="step4" class="steps steps4">
+		<div id="step4Content" class="stepContent"><p style="text-align:center">Thank You</p> </div>
+		<div class="stepBtns">
+		<button style="" type="button" class="btn btn-primary" id="step4Prev">Prev</button>
+     	<button style="" type="button" class="btn btn-primary" id="step4Next">Submit</button>
+     	</div>
+	</div>
+
+
+
+
+
+     <footer>
+		<div >
+			<p  class="copyright">Copyright 2014 Nanda Kishore Rao. All rights reserved.</p>
+		</div> 
+	</footer>
+     <img class="imgBack" src="images/back.jpg" />
+    </body>
+</html>

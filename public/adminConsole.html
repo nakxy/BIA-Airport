@@ -19,76 +19,244 @@
 		<title>BIA Console</title>
 		<script type="text/javascript">
 		$( document ).ready(function() {
+             $( "#homeBtn" ).click(function(){
+                $("#transit").hide( "slow", function() { });
+                $("#gates").show( "slow", function() { });
+             })
+             $( "#transitBtn" ).click(function(){
+                $("#gates").hide( "slow", function() { });
+                $("#transit").show( "slow", function() { });
+             })
 			socket.on('airportDetails',function(msg){
-			   	console.log(JSON.stringify(msg));
+                clearData();
+			   	for(var i=0;i<msg.length;i++)
+                {
+                    renderAircraft(msg[i]);
+                }
   			});	
-});
+            function clearData()
+            {
+                for(var cd=1;cd<=7;cd++)
+                {
+                    var gateID="gate"+cd;
+                    $("#"+gateID+"-airlineLogoImg").attr("src", "/images/default-img.png");
+                    $("#"+gateID+"-airlineImg").attr("src", "/images/plane-flight-icon.png");
+                    $("#"+gateID+"-flightNumber").text("");
+                    $("#"+gateID+"-flightSerial").text(""); 
+                    $("#"+gateID+"-flightDestination").text("");
+                    $("#"+gateID+"-flightArrival").text("");
+                    $("#"+gateID+"-flightArrivalTime").text("");
+                    $("#"+gateID+"-flightDepatureTime").text("");
+                    $("#"+gateID+"-flightStatus").text("");
+                    $("#"+gateID+"-flightOperator").text("");
+                }
+            }
+            function renderAircraft(aircraftDetails)
+            {
+                console.log(aircraftDetails);
+                var gateID="gate"+aircraftDetails.gate;
+                $("#"+gateID+"-airlineLogoImg").attr("src", aircraftDetails.airCraftLogo);
+                $("#"+gateID+"-airlineImg").attr("src", aircraftDetails.aircraftImg);
+                $("#"+gateID+"-flightNumber").text(aircraftDetails.flightNo);
+                $("#"+gateID+"-flightSerial").text(aircraftDetails.airCraftSerial);
+                $("#"+gateID+"-flightDestination").text(aircraftDetails.destination);
+                $("#"+gateID+"-flightArrival").text(aircraftDetails.origin);
+                $("#"+gateID+"-flightArrivalTime").text(aircraftDetails.arrival);
+                $("#"+gateID+"-flightDepatureTime").text(aircraftDetails.departure);
+                $("#"+gateID+"-flightStatus").text(aircraftDetails.status);
+                $("#"+gateID+"-flightOperator").text(aircraftDetails.operator);
+            }
+        });
 		</script>
     </head>
     <body>
     <header>
 	<button style=" float:left" class="headerBtn active" id="homeBtn">Home</button>
-	<button class="headerBtn" style=" float:left" id="reportBtn">Aircraft Details</button>
+	<button class="headerBtn" style=" float:left" id="arrivalsBtn">Arrivals</button>
+    <button class="headerBtn" style=" float:left" id="depaturesBtn">Departures</button>
 	<img src="images/dtfs_logo.png" style="float:right;margin-right:10%"/>
     </header>
-
-
-
-
-
-
      <section>
      	<div id="home" class="container-fluid">
+        <div id="gates"  style="display:block">
      		<div class="gateDiv">     			
      		<table style="width:100%">
      			<tr>
-     				<td rowspan="3" style="width:20%"><img src="images/gate_1.png" class="gateClass"></img></td>
-     				<td rowspan="3" style="width:20%"><img id="airlineLogoImg1" class="logoClass" src="images/default-img.png"></img></td>
-     				<td rowspan="3" style="width:20%"><img id="airlineImg1" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
-     				<td style="width:20%"><span><b>Flight number</span> : <span style="color:#0079c1" id="flight_no1"></span></b></td>
-     				<td style="width:20%"><span><b>Aricraft serial<span> : <span style="color:#0079c1" id="flight_serial1"></span></b></td>
+     				<td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+     				<td rowspan="4" style="width:20%"><img id="gate1-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+     				<td rowspan="4" style="width:20%"><img id="gate1-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+     				<td style="width:20%"><span><b>Flight number</span> : <span id="gate1-flightNumber" style="color:#0079c1"></span></b></td>
+     				<td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate1-flightSerial" style="color:#0079c1"></span></b></td>
      				</tr>
      			<tr>
-     				<td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="flight_destination1"></b></span></td>
-     				<td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1"id="flight_arrival1"></b></span></td>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate1-flightArrival"></b></span></td>
+     				<td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate1-flightDestination"></b></span></td>
+     				
      			</tr>
-     			<tr>
-     				<td style="width:20%"><span><b>Status</span> : <span id="flight_status1"></b></span></td>
-     				<td style="width:20%"><span><b>Departure</span> : <span  style="color:#0079c1" id="flight_Depature1"></b></span></td>
+     			<tr><td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate1-flightArrivalTime"></b></span></td>
+                <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate1-flightDepatureTime"></b></span></td>
      			</tr>
+                <tr> 
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 1</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate1-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate1-flightStatus"></b></span></td>     
+                </tr>
      		</table>
      		</div>
+             <div class="gateDiv">               
+            <table style="width:100%">
+                <tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate2-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate2-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate2-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate2-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate2-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate2-flightDestination"></b></span></td>
+                    
+                </tr>
+                <tr>
+                   <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate2-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate2-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 2</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate2-flightOperator"></b></span></td> <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate2-flightStatus"></b></span></td>
+                    
+                </tr>
+            </table>
+            </div>
      		<div class="gateDiv">     			
      		<table style="width:100%">
      			<tr>
-     				<td rowspan="3" style="width:20%"><img src="images/gate_2.png" class="gateClass"></img></td>
-     				<td rowspan="3" style="width:20%"><img id="airlineLogoImg2" class="logoClass" src="images/default-img.png"></img></td>
-     				<td rowspan="3" style="width:20%"><img id="airlineImg2" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
-     				<td style="width:20%"><span><b>Flight number</span> : <span style="color:#0079c1" id="flight_no2"></span></b></td>
-     				<td style="width:20%"><span><b>Aricraft serial<span> : <span style="color:#0079c1" id="flight_serial2"></span></b></td>
-     				</tr>
-     			<tr>
-     				<td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="flight_destination2"></b></span></td>
-     				<td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1"id="flight_arrival2"></b></span></td>
-     			</tr>
-     			<tr>
-     				<td style="width:20%"><span><b>Status</span> : <span id="flight_status2"></b></span></td>
-     				<td style="width:20%"><span><b>Departure</span> : <span  style="color:#0079c1" id="flight_Depature2"></b></span></td>
-     			</tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate3-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate3-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate3-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate3-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate3-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate3-flightDestination"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate3-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate3-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 3</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate3-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate3-flightStatus"></b></span></td>
+                    
+                </tr>
      		</table>
      		</div>
+            <div class="gateDiv">               
+            <table style="width:100%">
+                <tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate4-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate4-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate4-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate4-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate4-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate4-flightDestination"></b></span></td>
+                    
+                </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate4-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate4-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 4</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate4-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate4-flightStatus"></b></span></td>
+                    
+                </tr>
+            </table>
+            </div>
+            <div class="gateDiv">               
+            <table style="width:100%">
+                <tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate5-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate5-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate5-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate5-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate5-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate5-flightDestination"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate5-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate5-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 5</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate5-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate5-flightStatus"></b></span></td>
+                    
+                </tr>
+            </table>
+            </div>
+            <div class="gateDiv">               
+            <table style="width:100%">
+                <tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate6-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate6-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate6-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate6-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate6-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate6-flightDestination"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate6-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate6-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 6</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate6-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate6-flightStatus"></b></span></td>
+                    
+                </tr>
+            </table>
+            </div>
+            <div class="gateDiv" style="margin-bottom:5%">               
+            <table style="width:100%">
+                <tr>
+                    <td rowspan="3" style="width:20%"><img src="images/gateDefault.png" class="gateClass"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate7-airlineLogoImg" class="logoClass" src="images/default-img.png"></img></td>
+                    <td rowspan="4" style="width:20%"><img id="gate7-airlineImg" class="airlineImgClass" src="images/plane-flight-icon.png"></img></td>
+                    <td style="width:20%"><span><b>Flight number</span> : <span id="gate7-flightNumber" style="color:#0079c1"></span></b></td>
+                    <td style="width:20%"><span><b>Aricraft serial<span> : <span id="gate7-flightSerial" style="color:#0079c1"></span></b></td>
+                    </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival</span> : <span  style="color:#0079c1" id="gate7-flightArrival"></b></span></td>
+                    <td style="width:20%"><span><b>Destination</span> : <span style="color:#0079c1" id="gate7-flightDestination"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="width:20%"><span><b>Arrival Time</span> : <span  style="color:#0079c1" id="gate7-flightArrivalTime"></b></span></td>
+                    <td style="width:20%"><span><b>Departure Time</span> : <span  style="color:#0079c1" id="gate7-flightDepatureTime"></b></span></td>
+                </tr>
+                <tr>
+                    <td style="padding-left:3%"><span style="color:#0079c1; font-size:27px"><b>Gate 7</b></span></td>
+                    <td style="width:20%"><span><b>Operated By</span> : <span style="color:#0079c1" id="gate7-flightOperator"></b></span></td>
+                    <td style="width:20%"><span><b>Status</span> : <span style="color:#0079c1" id="gate7-flightStatus"></b></span></td>
+                    
+                </tr>
+            </table>
+            </div>
      	</div>
-     	<div id="report" style="display:none">
-     	</div>
+        </div>
      </section>
-     
-
-
-
-
-
-
-
 
      <footer>
 		<div >

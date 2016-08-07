@@ -9,80 +9,11 @@ var crypto = require('crypto');
 var md5sum = crypto.createHash('md5');
 var bodyParser= require('body-parser');
 
-var aircraftDetails = [];
+var aircraftDetails = '';
 var finalEmitPackage = [];
- var a1={
-		airline:"Air India Express",
-		serialNo:"VT-AXE",
-		img:"VT-AXE.jpeg",
-		logo:"Air_India_Express_Logo.png",
-		itenary:[{
-			gateId:"1",
-			startTime:"02:59",
-			endTime:"05:31",
-			landingTimeStart:"03:00",
-			landingTimeEnd:"03:10",
-			taxiTimeStart:"03:11",
-			taxiTimeEnd:"03:19",
-			deBoardingStart:"03:20",
-			deBoardingEnd:"04:20",
-			boardingStart:"04:21",
-			boardingEnd:"05:10",
-			taxitakeOffTimeStart:"05:11",
-			taxitakeOffTimeEnd:"05:20",
-			takeOffTimeStart:"05:21",
-			takeOffTimeEnd:"05:30"
-		},
-		{
-			gateId:"2",
-			flightNo:"AI-101",
-			destination:"Sharjah",
-			startTime:"20:00",
-			endTime:"23:30",
-			landingTimeStart:"20:00",
-			landingTimeEnd:"20:10",
-			taxiTimeStart:"20:10",
-			taxiTimeEnd:"20:20",
-			deBoardingStart:"20:20",
-			deBoardingEnd:"21:20",
-			boardingStart:"21:20",
-			boardingEnd:"22:10",
-			taxitakeOffTimeStart:"22:10",
-			taxitakeOffTimeEnd:"22:20",
-			takeOffTimeStart:"22:20",
-			takeOffTimeEnd:"23:30"
-		}]
-	};
-	aircraftDetails.push(a1);
 
-
-	var a2={
-		airline:"Emirates",
-		serialNo:"A6-EWC",
-		img:"A6-EWC.jpg",
-		logo:"Emirates_Logo.png",
-		itenary:[{
-			gateId:"3",
-			startTime:"01:00",
-			endTime:"03:30",
-			landingTimeStart:"01:00",
-			landingTimeEnd:"01:10",
-			taxiTimeStart:"01:10",
-			taxiTimeEnd:"01:20",
-			deBoardingStart:"01:20",
-			deBoardingEnd:"02:20",
-			boardingStart:"02:20",
-			boardingEnd:"03:00",
-			taxitakeOffTimeStart:"03:00",
-			taxitakeOffTimeEnd:"03:20",
-			takeOffTimeStart:"03:20",
-			takeOffTimeEnd:"03:30"
-		}]
-	};
-
-	aircraftDetails.push(a2);
-
-console.log(moment().format('HH:mm'));
+var flightInfo= require(process.cwd() + '/flightData/flights');
+	aircraftDetails=flightInfo.getFlightDetails();
 
 var server = app.listen(3000);
 var io = require('socket.io').listen(server);
@@ -97,60 +28,80 @@ function updateGlobalTimer ()
 {
 	finalEmitPackage.length=0;
 	console.log("global timer called");
-	//get local time
-	//get itenary
-	//compare and build response
-	// eit response
+	for(var x=0; x<aircraftDetails.length; x++){
+		aircraftDetails[x].itenary=flightTimeSpliter(aircraftDetails[x]);
+	}
+	setCurrentAirportFLight();
+}
 
+function flightTimeSpliter(flightData){
+	var arrTime = moment(flightData.startTime,'HH:mm');
+	var itenary={}
+	itenary.landingTimeStart=moment(arrTime);
+	itenary.landingTimeEnd=moment(arrTime).add(5, 'm');
+	itenary.taxiTimeStart=moment(arrTime).add(5, 'm');
+	itenary.taxiTimeEnd=moment(arrTime).add(10, 'm');
+	itenary.deBoardingStart=moment(arrTime).add(10, 'm');
+	itenary.deBoardingEnd=moment(arrTime).add(50, 'm');
+	itenary.boardingStart=moment(arrTime).add(50, 'm');
+	itenary.boardingEnd=moment(arrTime).add(110, 'm');
+	itenary.taxitakeOffTimeStart=moment(arrTime).add(110, 'm');
+	itenary.taxitakeOffTimeEnd=moment(arrTime).add(115, 'm');
+	itenary.takeOffTimeStart=moment(arrTime).add(115, 'm');
+	itenary.takeOffTimeEnd=moment(arrTime).add(120, 'm');
+	return itenary;
+}
+
+function setCurrentAirportFLight(){
 	var curTime=moment().format('HH:mm');
 	for(var x=0; x<aircraftDetails.length; x++){
 		var airCraft=aircraftDetails[x];
-		for(var i=0;i<airCraft.itenary.length; i++){
 			var curTime=moment('HH:mm');
-			var st=moment(airCraft.itenary[i].startTime,'HH:mm');
-			var et=moment(airCraft.itenary[i].endTime,'HH:mm');
-			if(st.isBefore()&&et.isAfter())
+			var st=moment(airCraft.startTime,'HH:mm');
+			var et=moment(airCraft.endTime,'HH:mm');
+			if(st.isBefore() && et.isAfter())
 			{
-				if(moment(airCraft.itenary[i].landingTimeStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].landingTimeEnd,'HH:mm').isAfter()){
+				if(moment(airCraft.itenary.landingTimeStart).isBefore() && moment(airCraft.itenary.landingTimeEnd).isAfter()){
 					console.log( airCraft.airline + " : Landing");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"Landing");
+					sendPackage(airCraft,"Landing");
 				}
-				else if(moment(airCraft.itenary[i].taxiTimeStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].taxiTimeEnd,'HH:mm').isAfter()){
-					console.log( airCraft.airline + " : landed taxing");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"landed taxing");
+				else if(moment(airCraft.itenary.taxiTimeStart).isBefore() && moment(airCraft.itenary.taxiTimeEnd).isAfter()){
+					console.log( airCraft.airline + " : Landed Taxing");
+					sendPackage(airCraft,"Landed Taxing");
 				}
-				else if(moment(airCraft.itenary[i].deBoardingStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].deBoardingEnd,'HH:mm').isAfter()){
-					console.log( airCraft.airline + " : deboarding");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"deboarding");
+				else if(moment(airCraft.itenary.deBoardingStart).isBefore() && moment(airCraft.itenary.deBoardingEnd).isAfter()){
+					console.log( airCraft.airline + " : Deboarding");
+					sendPackage(airCraft,"Deboarding");
 				}
-				else if(moment(airCraft.itenary[i].boardingStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].boardingEnd,'HH:mm').isAfter()){
-					console.log( airCraft.airline + " : boarding");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"boarding");
+				else if(moment(airCraft.itenary.boardingStart).isBefore() && moment(airCraft.itenary.boardingEnd).isAfter()){
+					console.log( airCraft.airline + " : Boarding");
+					sendPackage(airCraft,"Boarding");
 				}
-				else if(moment(airCraft.itenary[i].taxitakeOffTimeStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].taxitakeOffTimeEnd,'HH:mm').isAfter()){
-					console.log( airCraft.airline + " : takeoff taxing");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"takeoff taxing");
+				else if(moment(airCraft.itenary.taxitakeOffTimeStart).isBefore() && moment(airCraft.itenary.taxitakeOffTimeEnd).isAfter()){
+					console.log( airCraft.airline + " : Takeoff Taxing");
+					sendPackage(airCraft,"Takeoff Taxing");
 				}
-				else if(moment(airCraft.itenary[i].takeOffTimeStart,'HH:mm').isBefore() && moment(airCraft.itenary[i].takeOffTimeEnd,'HH:mm').isAfter()){
-					console.log( airCraft.airline + " : takeoff");
-					sendPackage(airCraft.itenary[i],airCraft.logo, airCraft.serialNo,"Takeoff");
+				else if(moment(airCraft.itenary.takeOffTimeStart).isBefore() && moment(airCraft.itenary.takeOffTimeEnd).isAfter()){
+					console.log( airCraft.airline + " : Takeoff");
+					sendPackage(airCraft,"Takeoff");
 				}
 			}
 		}
-	}
 	console.log(" airCraft details to push" + JSON.stringify(finalEmitPackage));
   	io.sockets.emit('airportDetails',finalEmitPackage);
-
 }
 
-function sendPackage(airCraftDetails,logo,serial,status){
+function sendPackage(airCraftDetails,status){
 	var sendObj={
 		flightNo:airCraftDetails.flightNo,
-		airCraftSerial:serial,
-		airCraftLogo:logo,
+		operator:airCraftDetails.operator,
+		airCraftSerial:airCraftDetails.serialNo,
+		airCraftLogo:airCraftDetails.logo,
+		aircraftImg:airCraftDetails.img,
 		destination:airCraftDetails.destination,
 		status:status,
 		arrival:airCraftDetails.startTime,
+		origin:airCraftDetails.origin,
 		departure:airCraftDetails.endTime,
 		gate:airCraftDetails.gateId
 	}
